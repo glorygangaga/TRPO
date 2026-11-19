@@ -1,4 +1,4 @@
-**ADR: choose-automatic-tests - выбор автоматических тестов**
+**ADR: 07-choose-automatic-tests - выбор автоматических тестов**
 
 **Дата:** 18 ноября 2026 г.
 

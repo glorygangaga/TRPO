@@ -1,4 +1,4 @@
-**ADR: choose-frontend - выбор Frontend**
+**ADR: 03-choose-frontend - выбор Frontend**
 
 **Дата:** 18 ноября 2026 г.
 

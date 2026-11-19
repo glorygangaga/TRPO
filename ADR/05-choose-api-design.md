@@ -1,4 +1,4 @@
-**ADR: choose-api-disign - выбор передачи api**
+**ADR: 05-choose-api-disign - выбор передачи api**
 
 **Дата:** 18 ноября 2026 г.
 

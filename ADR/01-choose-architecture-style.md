@@ -1,4 +1,4 @@
-**ADR: choose-architecture-style - выбор архитектурного стиля**
+**ADR: 01-choose-architecture-style - выбор архитектурного стиля**
 
 **Дата:** 18 ноября 2026 г.
 
