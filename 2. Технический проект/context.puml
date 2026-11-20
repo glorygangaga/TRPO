@@ -1,0 +1,37 @@
+@startuml Диаграмма контекста
+!include <c4/C4_Context>
+
+title "Диаграмма контекста"
+
+
+Person(Admin, "Администратор", "Отвечает за управление системой, пользователями, отелями, бронированиями и настройками платформы")
+Person(User_Auth, "Пользователь", "Зарегестрированный человек, использующий систему для поиска и бронирования отелей")
+Person_Ext(Guest, "Гость", "Не зарегестрированный человек, использующий систему для поиска и бронирования отелей")
+Person(Hotel, "Отель", "Гостиница или другой объект размещения, представленный в системе")
+Person(Partners, "Партнеры/агентсва", "Организация, использующая систему для рекламы, акций")
+
+System(hotel_system, "Система бронирования отелей", "Веб-приложение", "Next.js, NestJS, PostgeSQL, Redis, Docker, RabbitMQ")
+
+System_Ext(auth_provider, "OAuth Provider (Yandex, Гос. услуги)", "Аутентификация пользователей", "OAuth 2.0")
+System_Ext(message_provider, "Message provider (email)", "Оповещение полльзователей через email", "Resend")
+System_Ext(pay_provider, "Сервис электронных платежей", "Оплата бронирования", "ЮKassa")
+System_Ext(ai_recomendation_provider, "AI рекомендвции для поиска", "Поиск отелей и номеров по AI рекомендациям", "-")
+
+
+Rel(Admin, hotel_system, "Использует", "HTTP/2, WebSockets")
+Rel(User_Auth, hotel_system, "Использует", "HTTP/2, WebSockets")
+Rel(Guest, hotel_system, "Использует", "HTTP/2")
+Rel(Hotel, hotel_system, "Использует", "HTTP/2, WebSockets")
+Rel(Partners, hotel_system, "Использует", "HTTP/2, WebSockets")
+
+Rel(Admin, auth_provider, "Аутентификация", "OAuth 2.0")
+Rel(User_Auth, auth_provider, "Аутентификация", "OAuth 2.0")
+Rel(Guest, auth_provider, "Аутентификация", "OAuth 2.0")
+Rel(Hotel, auth_provider, "Аутентификация", "OAuth 2.0")
+Rel(Partners, auth_provider, "Аутентификация", "OAuth 2.0")
+
+Rel(hotel_system, message_provider, "Оповещение", "HTTP/2")
+Rel(hotel_system, pay_provider, "Оплата", "REST API")
+Rel(hotel_system, ai_recomendation_provider, "Поиск рекомендаций", "REST API")
+
+@enduml
