@@ -1,0 +1,87 @@
+@startuml Диаграмма контекста Web App
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+!define DEVICONS1 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define DEVICONS2 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons2
+
+!include DEVICONS1/redis.puml
+!include DEVICONS2/postgresql.puml
+
+title "Диаграмма контейнеров"
+
+Person(Admin, "Администратор", "Отвечает за управление системой, пользователями, отелями, бронированиями и настройками платформы")
+Person(User_Auth, "Пользователь", "Зарегестрированный человек, использующий систему для поиска и бронирования отелей")
+Person_Ext(Guest, "Гость", "Не зарегестрированный человек, использующий систему для поиска отелей")
+Person(Hotel, "Отель", "Гостиница или другой объект размещения, представленный в системе")
+Person(Partners, "Партнеры/агентсва", "Организация, использующая систему для рекламы, акций")
+
+System_Boundary(hotelSystem, "Веб-приложение для системы бронирования отелей") {
+  Container(clientWebApp, "Веб-интерфейс", "Chrome 80+, IE 11+/Edge, Safari 12+; SPA на Next.js", "Предоставляет интерфейс для получения .")
+    User_Auth --> clientWebApp : "Просмотр и бронирование своботных номеров отелей"
+    Guest --> clientWebApp : "Просмотр своботных номеров отелей"
+
+  Container(clientAdminPanel, "Панель администратора", "Chrome 80+, IE 11+/Edge, Safari 12+; Next.js", "Управление юзеррами, модерацией, работа с отелями и партнерами.")
+    Admin --> clientAdminPanel : "Управление отелями, пользователями и комментариями."
+
+  Container(clientHotelPanel, "Панель отеля", "Chrome 80+, IE 11+/Edge, Safari 12+; Next.js", "Управление юзеррами, модерацией, работа с отелями и партнерами.")
+    Hotel --> clientHotelPanel : "Управление номерным фондом, бронированиями, добавление доп. услуг и тарифов"
+
+  Container(clientPartnersPanel, "Панель партеров", "Chrome 80+, IE 11+/Edge, Safari 12+; Next.js", "Управление акциями и предложениями.")
+    Partners --> clientPartnersPanel : "Управление акциями и предложениями."
+
+  Container(backendComponent, "Backend", "NestJS", "Модульный монолит. Реализует бизнес-логику бронирования номеров, управление пользователями, бронированиями и платежами")
+    clientWebApp --> backendComponent : "API-вызовы\n[HTTPS, REST]"
+    clientAdminPanel --> backendComponent : "API-вызовы\n[HTTPS, REST]"
+    clientHotelPanel --> backendComponent : "API-вызовы\n[HTTPS, REST]"
+    clientPartnersPanel --> backendComponent : "API-вызовы\n[HTTPS, REST]"
+
+  ContainerQueue(eventBus, "Шина событий", "RabbitMQ", "Очереди уведомлений и др.")
+    backendComponent --> eventBus : "\n[JSON, AMQP]"
+  ContainerDb(storagePhotos, "Файловое хранилище", "MinIO, S3", "Фотографии номеров, отелей и отзывов.")
+    backendComponent --> storagePhotos : "Читает, записывает файлы\n[HTTPS]"
+  
+  ContainerDb(postgredb, "База данных", "PostgreSQL 12+", "База данных системы бронирования отелей.", $sprite="postgresql")
+    backendComponent --> postgredb : "Читает, записывает данные\n[SQL, TCP]"
+
+  ContainerDb(redisdb, "cache scheme", "Redis", "Кеширует информацию о поисковых операциях, сессии полльзователей", $sprite="redis")
+    backendComponent --> redisdb : "Читает, записывает данные в кеше\n[TCP, TLS]"
+}
+
+System_Boundary(monitoringSystem, "Сервис системы мониторинга") {
+  Container(grafanaAlloy, "Grafana Alloy", "Сбор, обработка и передача телеметрии")
+    grafanaAlloy --> backendComponent : "Сбор логов\n[HTTP]"
+  
+  Container(grafanaLoki, "Grafana Loki", "централизованное хранение и поиск логов")
+    grafanaAlloy --> grafanaLoki : "Хранение логов\n[gRPC, HTTP]"
+
+  Container(prometheus, "Prometheus", "сбор и хранение метрик, получение данных для мониторинга")
+    prometheus --> backendComponent : "Сбор метрик\n[HTTP]"
+
+  Container(grafana, "Grafana", "визуализация данных, создание дашбордов, анализ логов и метрик, настройка оповещений")
+    grafana --> prometheus : "Визуальное изображение метрик\n[HTTP]"
+    grafana --> grafanaLoki : "Визуальное изображение логов\n[HTTP]"
+}
+
+System_Ext(hotel_provider, "Внешняя система отелей", "Система, хранящая определенные данные отеля и номеров", "PMS, CRM")
+  backendComponent --> hotel_provider : "Передача данных отеля\n[HTTPS]"
+System_Ext(location_provider, "Сервис с онлайн картой", "Показ местонаходжения отеля", "Yandex, google iframe")
+  clientWebApp --> location_provider : "Показ местонаходжения отеля\n[HTTPS]"
+
+System_Ext(message_provider, "Сервис сообщений для email", "Оповещение полльзователей через email", "Resend")
+  backendComponent --> message_provider : "Передача сообщений на email\n[HTTPS]"
+System_Ext(pay_provider, "Сервис электронных платежей", "Оплата бронирования", "ЮKassa")
+  backendComponent --> pay_provider : "Работа с оплатай на сайте\n[HTTPS]"
+  User_Auth --> pay_provider : "Оплата\n[HTTPS]"
+System_Ext(backup_storage, "Backup Storage", "Резервное хранилище для ранения данных и медиа", "Резервное хранилище")
+  backendComponent --> backup_storage : "Передача данных для резервного хранения\n[HTTPS]"
+System_Ext(ai_recomendation_provider, "AI рекоменации для поиска", "Поиск отелей и номеров по AI рекомендациям")
+  backendComponent --> ai_recomendation_provider : "Получение рекомендаций\n[HTTPS]"
+System_Ext(sms_serivce, "Сервис сообщений для смс", "Поиск отелей и номеров по AI рекомендациям")
+  backendComponent --> sms_serivce : "Передача сообщений на смс\n[HTTPS]"
+System_Ext(auth_provider, "OAuth Provider (Yandex, Гос. услуги)", "Аутентификация пользователей", "OAuth 2.0")
+  backendComponent --> auth_provider : "Работа с аутентификацией\n[HTTPS]"
+  User_Auth --> auth_provider : "Вход/выход через стороние сервисы\n[HTTPS]"
+  Guest --> auth_provider : "Вход/выход через стороние сервисы\n[HTTPS]"
+
+@enduml

@@ -3,35 +3,39 @@
 
 title "Диаграмма контекста"
 
-
 Person(Admin, "Администратор", "Отвечает за управление системой, пользователями, отелями, бронированиями и настройками платформы")
 Person(User_Auth, "Пользователь", "Зарегестрированный человек, использующий систему для поиска и бронирования отелей")
-Person_Ext(Guest, "Гость", "Не зарегестрированный человек, использующий систему для поиска и бронирования отелей")
+Person_Ext(Guest, "Гость", "Не зарегестрированный человек, использующий систему для поиска отелей")
 Person(Hotel, "Отель", "Гостиница или другой объект размещения, представленный в системе")
 Person(Partners, "Партнеры/агентсва", "Организация, использующая систему для рекламы, акций")
 
 System(hotel_system, "Система бронирования отелей", "Веб-приложение", "Next.js, NestJS, PostgeSQL, Redis, Docker, RabbitMQ")
 
 System_Ext(auth_provider, "OAuth Provider (Yandex, Гос. услуги)", "Аутентификация пользователей", "OAuth 2.0")
-System_Ext(message_provider, "Message provider (email)", "Оповещение полльзователей через email", "Resend")
+System_Ext(message_provider, "Сервис сообщений для email (email)", "Оповещение полльзователей через email", "Resend")
 System_Ext(pay_provider, "Сервис электронных платежей", "Оплата бронирования", "ЮKassa")
 System_Ext(ai_recomendation_provider, "AI рекомендвции для поиска", "Поиск отелей и номеров по AI рекомендациям", "-")
+System_Ext(sms_serivce, "Сервис сообщений для смс", "Поиск отелей и номеров по AI рекомендациям", "-")
+System_Ext(backup_storage, "Backup Storage", "Резервное хранилище для ранения данных и медиа", "Резервное хранилище")
+System_Ext(hotel_provider, "Внешняя система отелей", "Система, хранящая определенные данные отеля и номеров", "PMS, CRM")
+System_Ext(location_provider, "Сервис с онлайн картой", "Показ местонаходжения отеля", "Yandex, google iframe")
 
-
-Rel(Admin, hotel_system, "Использует", "HTTP/2, WebSockets")
-Rel(User_Auth, hotel_system, "Использует", "HTTP/2, WebSockets")
-Rel(Guest, hotel_system, "Использует", "HTTP/2")
-Rel(Hotel, hotel_system, "Использует", "HTTP/2, WebSockets")
-Rel(Partners, hotel_system, "Использует", "HTTP/2, WebSockets")
-
-Rel(Admin, auth_provider, "Аутентификация", "OAuth 2.0")
-Rel(User_Auth, auth_provider, "Аутентификация", "OAuth 2.0")
-Rel(Guest, auth_provider, "Аутентификация", "OAuth 2.0")
-Rel(Hotel, auth_provider, "Аутентификация", "OAuth 2.0")
-Rel(Partners, auth_provider, "Аутентификация", "OAuth 2.0")
+Rel(Admin, hotel_system, "Получение dashboard web-приложение", "HTTP/2, WebSockets")
+Rel(User_Auth, hotel_system, "Получает web-приложение", "HTTP/2, WebSockets")
+Rel(Guest, hotel_system, "Получает web-приложение", "HTTP/2")
+Rel(Hotel, hotel_system, "Получение dashboard web-приложение", "HTTP/2, WebSockets")
+Rel(Partners, hotel_system, "Получение dashboard web-приложение", "HTTP/2, WebSockets")
+Rel(User_Auth, pay_provider, "Оплата", "HTTP/2, WebSockets")
+Rel(User_Auth, auth_provider, "Аутентификация", "HTTP/2, WebSockets")
+Rel(Guest, auth_provider, "Аутентификация", "HTTP/2")
 
 Rel(hotel_system, message_provider, "Оповещение", "HTTP/2")
 Rel(hotel_system, pay_provider, "Оплата", "REST API")
 Rel(hotel_system, ai_recomendation_provider, "Поиск рекомендаций", "REST API")
+Rel(hotel_system, sms_serivce, "Поиск рекомендаций", "REST API")
+Rel(hotel_system, auth_provider, "Аутентификация", "OAuth 2.0, REST API")
+Rel(hotel_system, backup_storage, "Резервное хранение данных", "HTTP/2")
+Rel(hotel_system, hotel_provider, "Передача данных отеля", "HTTP/2")
+Rel(hotel_system, location_provider, "Показ местонаходжения отеля", "HTTP/2")
 
 @enduml

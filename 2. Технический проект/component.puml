@@ -1,0 +1,66 @@
+@startuml Диаграмма компонентов - backend
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title "Диаграмма компонентов - backend"
+
+Container_Boundary(backendBoundary, "Backend - NestJS модульный монолит") {
+  Component(authModule, "Auth module", "NestJS", "Регистрация, авторизация, OAuth, подтверждение аккаунта, восстановление пароля")
+  Component(userModule, "User module", "NestJS", "Профиль пользователя, личные данные")
+  Component(hotelModule, "Hotel module", "NestJS", "Отели, описание, адрес, звёзды, координаты")
+  Component(roomModule, "Room module", "NestJS", "Номера, вместимость, удобства, фотографии")
+  Component(reviewModule, "Review module", "NestJS", "Отзывы, оценки, ответы отелей")
+  Component(reservationModule, "Reservation module", "NestJS", "Создание, изменение, отмена и просмотр бронирований")
+  Component(paymentModule, "Payment module", "NestJS", "Оплата, возвраты, статусы платежей")
+  Component(chatModule, "Chat module", "NestJS", "Общение пользователя с поддержкой")
+  Component(notificationModule, "Notification module", "NestJS", "Email, SMS, уведомления о бронированиях и заездах")
+  Component(integrationModule, "Integration module", "NestJS", "Интеграция с PMS, CRM и внешними партнёрами")
+  Component(catalogModule, "Catalog module", "NestJS", "Каталог отелей и номеров, фильтрация, пагинация")
+  Component(searchModule, "Search module", "NestJS", "Поиск отелей по ключевым словам, параметрам и датам")
+  Component(recommendationModule, "Recommendation module", "NestJS", "AI-рекомендации и персонализированный поиск")
+  Component(rateModule, "Rate module", "NestJS", "Тарифы, цены, условия проживания")
+  Component(mediaModule, "Media module", "NestJS", "Загрузка, хранение и удаление фотографий и видео")
+  Component(supportModule, "Support module", "NestJS", "Обращения, жалобы, обращения по бронированиям")
+  Component(serviceRequestModule, "Service request module", "NestJS", "Заказ еды, трансфера, клининга и дополнительных услуг")
+  Component(analyticsModule, "Analytics module", "NestJS", "Аналитика отелей, партнёров и использования системы")
+  Component(moderationModule, "Moderation module", "NestJS", "Модерация отзывов, фотографий и ответов")
+  Component(availabilityModule, "Availability module", "NestJS", "Аналитика отелей, партнёров и использования системы")
+  Component(favoriteModule, "Favorite module", "NestJS", "Хранение отелей и номеров понравившийся пользователям")
+}
+
+Rel(userModule, supportModule, "Связь с тех. поддержкой")
+Rel(userModule, notificationModule, "Работа с оповещениями")
+Rel(userModule, mediaModule, "Получение медиафайлов")
+
+Rel(authModule, userModule, "Использует для сессий, проверки аккаунта")
+Rel(authModule, notificationModule, "подверждение аккаунта, сброс пароля")
+
+Rel(hotelModule, roomModule, "Получает данные номера")
+Rel(hotelModule, reviewModule, "Получение отзывов")
+Rel(hotelModule, rateModule, "Получение тарифов, цены и др.")
+Rel(hotelModule, mediaModule, "Получение медиафайлов")
+
+Rel(roomModule, mediaModule, "Получение медиафайлов")
+Rel(roomModule, reviewModule, "Получение отзывов")
+Rel(roomModule, rateModule, "Получение тарифов, цены и др.")
+Rel(roomModule, serviceRequestModule, "Использует")
+
+Rel(catalogModule, hotelModule, "Получает данные отеля")
+Rel(catalogModule, roomModule, "Получает данные номера")
+
+Rel(reservationModule, paymentModule, "Использует оплату")
+Rel(reservationModule, rateModule, "получает инормацию о цене")
+Rel(reservationModule, chatModule, "Связь с тех. поддержкой")
+Rel(reservationModule, supportModule, "Написание жалоб")
+Rel(reservationModule, notificationModule, "Работа с оповещениями")
+
+Rel(searchModule, recommendationModule, "Использует")
+Rel(searchModule, catalogModule, "Использует")
+
+Rel(reviewModule, mediaModule, "Получение медиафайлов")
+
+Rel(favoriteModule, userModule, "Связывает избранное с пользователем")
+Rel(favoriteModule, roomModule, "Получает данные номера")
+Rel(favoriteModule, hotelModule, "Получает данные отеля")
+
+@enduml
